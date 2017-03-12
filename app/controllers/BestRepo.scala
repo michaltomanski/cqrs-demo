@@ -10,7 +10,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class BestRepo @Inject()(val dbConfigProvider: DatabaseConfigProvider) extends HasDatabaseConfigProvider[JdbcProfile]{
 
   def getAll() = {
-    db.run(sql"SELECT * FROM best_average limit 5;".as[(String, Long)]).map(
+    val q = sql"SELECT * FROM best_average ORDER BY average ASC LIMIT 10".as[(String, Long)]
+    db.run(q).map(
       _.map(e => BestAvg(e._1, e._2))
     )
   }

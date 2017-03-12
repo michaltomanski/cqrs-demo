@@ -1,0 +1,7 @@
+@(best: Seq[BestAvg])
+
+<ol>
+    @for(r <- best) {
+        <li style="font-size:42px; font-weight: bold; margin-left: 300px">@r.user: @{r.millis / 1000 }.@{r.millis % 1000 } s</li>
+    }
+</ol>

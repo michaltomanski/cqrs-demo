@@ -24,9 +24,9 @@ class Application @Inject()(actorSystem: ActorSystem, repo: BestRepo) extends Co
   }
 
   def get = Action.async {
-    implicit val format = Json.format[BestAvg] // fix
+    //implicit val format = Json.format[BestAvg] // fix
     repo.getAll().map { r =>
-      Ok(Json.toJson(r))
+      Ok(views.html.best(r))
     }
   }
 

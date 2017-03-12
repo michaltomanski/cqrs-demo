@@ -1,31 +1,46 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 
 <script>
-    var seconds = null;
+    var milliseconds = null;
 
     function startTimer(display) {
         return setInterval(function() {
-          seconds = seconds + 1;
-          display.text(seconds)
-        }, 1000)
+          milliseconds = milliseconds + 10;
+          seconds = parseInt(milliseconds / 1000);
+          millis = milliseconds % 1000;
+
+          var secondsDisplay = seconds < 10 ? "0" + seconds : seconds;
+          var millisDisplay;
+          if (millis < 100) {
+              millisDisplay = "0" + millis;
+          } else if (millis < 10) {
+              millisDisplay = "00" + millis;
+          } else {
+              millisDisplay = millis;
+          }
+
+          display.text(secondsDisplay + "." + millisDisplay);
+        }, 10)
     }
 
 
     var isStarted = false;
     var timerFunction = null;
-    $(document).keydown(function() {
-        jQuery(function ($) {
-            if (isStarted) {
-                isStarted = false;
-                clearInterval(timerFunction);
-                $.postJSON("http://localhost:9000/time", {user: "ee", millis: seconds});
-                seconds = 0;
-            } else {
-                isStarted = true;
-                var display = $('#time');
-                timerFunction = startTimer(display);
-            }
-        });
+    $(document).keydown(function(event) {
+        if (event.keyCode == 32) {
+            jQuery(function ($) {
+                if (isStarted) {
+                    isStarted = false;
+                    clearInterval(timerFunction);
+                    $.postJSON("http://localhost:9000/time", {user: "test", millis: milliseconds});
+                } else {
+                    isStarted = true;
+                    milliseconds = 0;
+                    var display = $('#time');
+                    timerFunction = startTimer(display);
+                }
+            });
+        }
     });
 
     $.postJSON = function(url, data, callback) {
@@ -40,6 +55,4 @@
 
 </script>
 
-<b>yo</b>
-
-    <b id="time"></b>
+<div style="font-size:150px; font-weight: bold; text-align:center; margin-bottom:0" id="time">00.000</div>
