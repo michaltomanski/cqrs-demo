@@ -1,0 +1,45 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+<script>
+    var seconds = null;
+
+    function startTimer(display) {
+        return setInterval(function() {
+          seconds = seconds + 1;
+          display.text(seconds)
+        }, 1000)
+    }
+
+
+    var isStarted = false;
+    var timerFunction = null;
+    $(document).keydown(function() {
+        jQuery(function ($) {
+            if (isStarted) {
+                isStarted = false;
+                clearInterval(timerFunction);
+                $.postJSON("http://localhost:9000/time", {user: "ee", millis: seconds});
+                seconds = 0;
+            } else {
+                isStarted = true;
+                var display = $('#time');
+                timerFunction = startTimer(display);
+            }
+        });
+    });
+
+    $.postJSON = function(url, data, callback) {
+        return jQuery.ajax({
+            'type': 'POST',
+            'url': url,
+            'contentType': 'application/json',
+            'data': JSON.stringify(data),
+            'success': callback
+        });
+    };
+
+</script>
+
+<b>yo</b>
+
+    <b id="time"></b>
