@@ -6,24 +6,22 @@ import akka.persistence.{PersistentActor, RecoveryCompleted}
 class Speedcuber extends PersistentActor {
 
   var times: Seq[Long] = Nil
-  var bestAvg: Long = _
+  var bestAvg: Long = 0
 
   override def receiveRecover: Receive = {
-    case e: Event => updateState(e)
-    case RecoveryCompleted => println("Recovery completed")
-    case e => println(s"Unknown event ${e.toString}")
+    case event: Event => updateState(event)
+    case RecoveryCompleted => println("Events recovery completed")
   }
 
   override def receiveCommand: Receive = {
     case time: TimeDTO => persist(TimeAdded(time.user, time.millis)) { event =>
       updateState(event)
-      println(time.millis)
+      println(s"New time persisted $event")
       val lastAvg = calculateLastAvg(times)
-      println(s"last avg: $lastAvg")
       if (times.length == 5 || lastAvg < bestAvg) {
-        println(s"NEW BEST! $lastAvg")
-        persist(BestAvgChanged(event.user, lastAvg)) {
-          event => updateState(event)
+        persist(BestAvgChanged(event.user, lastAvg)) { event =>
+          updateState(event)
+          println("New best average persisted $event")
         }
       }
       sender ! time
@@ -54,6 +52,5 @@ case class TimeAdded(user: String, millis: Long) extends Event
 case class BestAvgChanged(user: String, millis: Long) extends Event
 
 object Speedcuber {
-  println("========================== CREATING")
   def props() = Props(new Speedcuber)
 }

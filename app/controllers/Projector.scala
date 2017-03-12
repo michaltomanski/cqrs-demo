@@ -2,14 +2,12 @@ package controllers
 
 import javax.inject.Inject
 
-import akka.NotUsed
-import akka.actor.{Actor, Props}
+import akka.actor.Props
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
-import akka.persistence.query.{EventEnvelope, PersistenceQuery}
-import akka.persistence.query.scaladsl.ReadJournal
+import akka.persistence.query.PersistenceQuery
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{Sink, Source}
+import akka.stream.scaladsl.Sink
 
 class Projector @Inject()(repo: BestRepo) extends PersistentActor {
   private implicit val actorMaterializer = ActorMaterializer()(context)
@@ -17,30 +15,25 @@ class Projector @Inject()(repo: BestRepo) extends PersistentActor {
   var offset = 0L
   var firstOffsetSaved = false
 
-  override def receiveRecover: Receive = {
-    case OffsetSaved(value) => {
-      println(s"Recovering $offset")
-      offset = value
-      firstOffsetSaved = true
-    }
-    case RecoveryCompleted => {
-      println("REC COMP")
-      val source = readJournal.eventsByTag("all", offset).drop(if (firstOffsetSaved) 1 else 0)
-      source.map{e => self ! e.event; e}.runWith(Sink.foreach{ e => self ! SaveOffset(e.offset)})
-    }
-  }
-
-
-
   override def receiveCommand: Receive = {
     case SaveOffset(value) => persist(OffsetSaved(value)) { e =>
       offset = e.offset
       firstOffsetSaved = true
-      println(s"offset saved $value")
     }
     case event: BestAvgChanged =>
-      println(s"UPDATING BEST $event")
+      println(s"Updating view of best averages with $event")
       repo.upsert(event.user, event.millis)
+  }
+
+  override def receiveRecover: Receive = {
+    case OffsetSaved(value) =>
+      offset = value
+      firstOffsetSaved = true
+    case RecoveryCompleted =>
+      println("Offset recovery completed")
+      val source = readJournal.eventsByTag("all", offset).drop(if (firstOffsetSaved) 1 else 0)
+      source.map{e => self ! e.event; e}.runWith(Sink.foreach{ e => self ! SaveOffset(e.offset)})
+      println("Stream started")
   }
 
   override def persistenceId: String = "projector"

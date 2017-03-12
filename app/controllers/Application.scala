@@ -4,27 +4,28 @@ package controllers
 import javax.inject.Inject
 
 import akka.actor.ActorSystem
+import akka.pattern.ask
 import play.api.libs.json.{JsError, Json}
 import play.api.mvc._
 import play.api.libs.concurrent.Execution.Implicits._
+
+import scala.concurrent.Future
 
 class Application @Inject()(actorSystem: ActorSystem, repo: BestRepo) extends Controller {
 
   val actor = new SpeedcuberClusterShardLocator(actorSystem).speedcuber
 
-  def index = Action(parse.json) { request =>
-    println(request.body)
+  def index = Action.async(parse.json) { request =>
     request.body.validate[TimeDTO].fold(
-      err => BadRequest(JsError(err).toString),
+      err => Future.successful(BadRequest(JsError(err).toString)),
       time => {
-        actor ! time
-        Ok(Json.toJson(time.millis))
+        (actor ? time).mapTo[TimeAdded].map(timeAdded =>
+          Ok(Json.toJson(timeAdded.millis)))
       }
     )
   }
 
   def get = Action.async {
-    //implicit val format = Json.format[BestAvg] // fix
     repo.getAll().map { r =>
       Ok(views.html.best(r))
     }
@@ -38,8 +39,3 @@ class Application @Inject()(actorSystem: ActorSystem, repo: BestRepo) extends Co
 }
 
 case class BestAvg(user: String, millis: Long)
-
-object BestAvg {
-  implicit val format = Json.format[BestAvg]
-}
-
