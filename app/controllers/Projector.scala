@@ -8,6 +8,7 @@ import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
 import akka.persistence.query.PersistenceQuery
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
+import com.mtomanski.timer.domain.Speedcuber.BestAvgChanged
 
 class Projector @Inject()(repo: BestRepo) extends PersistentActor {
   private implicit val actorMaterializer = ActorMaterializer()(context)
@@ -21,7 +22,7 @@ class Projector @Inject()(repo: BestRepo) extends PersistentActor {
       firstOffsetSaved = true
     }
     case event: BestAvgChanged =>
-      println(s"Updating view of best averages with $event")
+      println(s"Updating view of averages averages with $event")
       repo.upsert(event.user, event.millis)
   }
 

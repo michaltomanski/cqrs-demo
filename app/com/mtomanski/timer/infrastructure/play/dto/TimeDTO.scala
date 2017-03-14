@@ -1,4 +1,4 @@
-package controllers
+package com.mtomanski.timer.infrastructure.play.dto
 
 import play.api.libs.json.Json
 

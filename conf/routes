@@ -3,10 +3,10 @@
 # ~~~~
 
 # Home page
-GET      /                  controllers.Application.i
+GET      /                  com.mtomanski.timer.infrastructure.play.controller.TimerController.i
 
-POST     /time                     controllers.Application.index
-GET      /avg/best                      controllers.Application.get
+POST     /time                     com.mtomanski.timer.infrastructure.play.controller.TimerController.index
+GET      /avg/best                      com.mtomanski.timer.infrastructure.play.controller.TimerController.get
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
