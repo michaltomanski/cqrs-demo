@@ -1,3 +1,3 @@
-package com.mtomanski.timer.infrastructure.play
+package com.mtomanski.timer.domain.model
 
 case class BestAvg(user: String, millis: Long)

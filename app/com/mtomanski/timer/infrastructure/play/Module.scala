@@ -5,9 +5,11 @@ import javax.inject.{Inject, Provider}
 import akka.actor.{ActorRef, ActorSystem}
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
-import com.mtomanski.timer.domain.SpeedcuberLocator
-import com.mtomanski.timer.infrastructure.akka.SpeedcuberClusterShardLocator
-import controllers.{BestRepo, Projector}
+import com.mtomanski.timer.domain.repository.BestAvgRepository
+import com.mtomanski.timer.domain.service.SpeedcuberLocator
+import com.mtomanski.timer.infrastructure.locator.SpeedcuberClusterShardLocator
+import com.mtomanski.timer.infrastructure.repository.PostgresBestAvgRepository
+import com.mtomanski.timer.infrastructure.projection.Projector
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.{Configuration, Environment}
 
@@ -18,11 +20,12 @@ class Module(environment: Environment, configuration: Configuration) extends Abs
       .toProvider(classOf[ProjectorProvider])
       .asEagerSingleton()
     bind(classOf[SpeedcuberLocator]).to(classOf[SpeedcuberClusterShardLocator])
+    bind(classOf[BestAvgRepository]).to(classOf[PostgresBestAvgRepository])
 
   }
 }
 
-class ProjectorProvider @Inject()(actorSystem: ActorSystem, repo: BestRepo) extends Provider[ActorRef] {
+class ProjectorProvider @Inject()(actorSystem: ActorSystem, repo: BestAvgRepository) extends Provider[ActorRef] {
   private lazy val instance = actorSystem.actorOf(Projector.props(repo))
 
   override def get(): ActorRef = instance

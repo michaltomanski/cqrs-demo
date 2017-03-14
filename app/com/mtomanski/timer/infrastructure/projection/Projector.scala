@@ -1,16 +1,18 @@
-package controllers
+package com.mtomanski.timer.infrastructure.projection
 
 import javax.inject.Inject
 
 import akka.actor.Props
-import akka.persistence.{PersistentActor, RecoveryCompleted}
 import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
 import akka.persistence.query.PersistenceQuery
+import akka.persistence.{PersistentActor, RecoveryCompleted}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
-import com.mtomanski.timer.domain.Speedcuber.BestAvgChanged
+import com.mtomanski.timer.domain.model.BestAvg
+import com.mtomanski.timer.domain.model.Speedcuber.BestAvgChanged
+import com.mtomanski.timer.domain.repository.BestAvgRepository
 
-class Projector @Inject()(repo: BestRepo) extends PersistentActor {
+class Projector @Inject()(repo: BestAvgRepository) extends PersistentActor {
   private implicit val actorMaterializer = ActorMaterializer()(context)
 
   var offset = 0L
@@ -23,7 +25,7 @@ class Projector @Inject()(repo: BestRepo) extends PersistentActor {
     }
     case event: BestAvgChanged =>
       println(s"Updating view of averages averages with $event")
-      repo.upsert(event.user, event.millis)
+      repo.upsert(BestAvg(event.user, event.millis))
   }
 
   override def receiveRecover: Receive = {
@@ -44,7 +46,7 @@ class Projector @Inject()(repo: BestRepo) extends PersistentActor {
 }
 
 object Projector {
-  def props(repo: BestRepo) = Props(new Projector(repo))
+  def props(repo: BestAvgRepository) = Props(new Projector(repo))
 }
 
 case class SaveOffset(offset: Long)

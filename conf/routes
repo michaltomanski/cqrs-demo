@@ -2,11 +2,13 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# Home page
-GET      /                  com.mtomanski.timer.infrastructure.play.controller.TimerController.i
+# API
+POST     /time                 com.mtomanski.timer.infrastructure.play.controller.TimerController.addTime
 
-POST     /time                     com.mtomanski.timer.infrastructure.play.controller.TimerController.index
-GET      /avg/best                      com.mtomanski.timer.infrastructure.play.controller.TimerController.get
+# Views
+GET      /                     com.mtomanski.timer.infrastructure.play.controller.ViewsController.renderTimer
+
+GET      /avg/best             com.mtomanski.timer.infrastructure.play.controller.ViewsController.bestAverages
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

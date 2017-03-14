@@ -1,4 +1,4 @@
-package com.mtomanski.timer.infrastructure.akka
+package com.mtomanski.timer.infrastructure.akka.adapter
 
 import akka.persistence.journal.{Tagged, WriteEventAdapter}
 

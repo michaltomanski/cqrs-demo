@@ -1,4 +1,4 @@
-package com.mtomanski.timer.domain
+package com.mtomanski.timer.domain.service
 
 object AverageCalculator {
 

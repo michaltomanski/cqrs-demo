@@ -1,8 +1,9 @@
-package com.mtomanski.timer.domain
+package com.mtomanski.timer.domain.model
 
 import akka.actor.Props
 import akka.persistence.{PersistentActor, RecoveryCompleted}
-import com.mtomanski.timer.domain.Speedcuber._
+import com.mtomanski.timer.domain.model.Speedcuber._
+import com.mtomanski.timer.domain.service.AverageCalculator
 
 object Speedcuber {
 
@@ -38,7 +39,7 @@ class Speedcuber extends PersistentActor {
       if (isNewAvgBetter(newAvg)) {
         persist(BestAvgChanged(event.user, newAvg)) { event =>
           updateState(event)
-          println(s"New averages average persisted $event")
+          println(s"New best average persisted $event")
         }
       }
       sender ! event
