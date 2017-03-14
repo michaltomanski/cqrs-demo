@@ -5,13 +5,17 @@ import javax.inject.Inject
 
 import akka.actor.ActorSystem
 import akka.pattern.ask
+import akka.util.Timeout
 import play.api.libs.json.{JsError, Json}
 import play.api.mvc._
 import play.api.libs.concurrent.Execution.Implicits._
 
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 class Application @Inject()(actorSystem: ActorSystem, repo: BestRepo) extends Controller {
+
+  implicit val timeout: Timeout = 3 seconds
 
   val actor = new SpeedcuberClusterShardLocator(actorSystem).speedcuber
 

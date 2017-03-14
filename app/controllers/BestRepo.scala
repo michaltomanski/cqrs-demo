@@ -20,14 +20,8 @@ class BestRepo @Inject()(val dbConfigProvider: DatabaseConfigProvider) extends H
     db.run(for {
       e <- exists(user)
       _ <- e match {
-        case true => {
-          println("upd")
-          update(user, average)
-        }
-        case false => {
-          println("ins")
-          insert(user, average)
-        }
+        case true => update(user, average)
+        case false => insert(user, average)
       }
     } yield 1)
   }

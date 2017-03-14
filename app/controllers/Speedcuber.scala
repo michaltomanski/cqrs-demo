@@ -21,10 +21,10 @@ class Speedcuber extends PersistentActor {
       if (times.length == 5 || lastAvg < bestAvg) {
         persist(BestAvgChanged(event.user, lastAvg)) { event =>
           updateState(event)
-          println("New best average persisted $event")
+          println(s"New best average persisted $event")
         }
       }
-      sender ! time
+      sender ! event
     }
   }
 

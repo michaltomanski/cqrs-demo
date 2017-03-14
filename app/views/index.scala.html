@@ -32,7 +32,8 @@
                 if (isStarted) {
                     isStarted = false;
                     clearInterval(timerFunction);
-                    $.postJSON("http://localhost:9000/time", {user: "test", millis: milliseconds});
+                    var username = $('#username').val();
+                    $.postJSON("http://localhost:9000/time", {user: username, millis: milliseconds});
                 } else {
                     isStarted = true;
                     milliseconds = 0;
@@ -56,3 +57,4 @@
 </script>
 
 <div style="font-size:150px; font-weight: bold; text-align:center; margin-bottom:0" id="time">00.000</div>
+<div>Username: <input id="username" type="text"/></div>
