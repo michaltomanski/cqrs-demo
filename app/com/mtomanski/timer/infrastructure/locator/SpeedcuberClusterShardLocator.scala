@@ -20,7 +20,8 @@ class SpeedcuberClusterShardLocator @Inject()(actorSystem: ActorSystem) extends 
     case msg: AddTime => (msg.user.hashCode % numberOfShards).toString
   }
 
-  val speedcuber: ActorRef = ClusterSharding(actorSystem).start(
+  val speedcuber: ActorRef =
+    ClusterSharding(actorSystem).start(
     typeName = "Speedcuber",
     entityProps = Speedcuber.props(),
     settings = ClusterShardingSettings(actorSystem),
