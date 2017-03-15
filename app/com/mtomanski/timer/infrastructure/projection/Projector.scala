@@ -34,7 +34,7 @@ class Projector @Inject()(repo: BestAvgRepository) extends PersistentActor {
       firstOffsetSaved = true
     case RecoveryCompleted =>
       println(s"Offset recovery completed. Last offset: $offset")
-      val source = readJournal.eventsByTag("all", offset).drop(if (firstOffsetSaved) 1 else 0)
+      val source = readJournal.eventsByTag("Speedcuber", offset).drop(if (firstOffsetSaved) 1 else 0)
       source.map{e => self ! e.event; e}.runWith(Sink.foreach{ e => self ! SaveOffset(e.offset)})
       println("Event stream processing started")
   }
