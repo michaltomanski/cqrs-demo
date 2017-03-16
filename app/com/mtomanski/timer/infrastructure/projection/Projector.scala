@@ -11,8 +11,10 @@ import akka.stream.scaladsl.Sink
 import com.mtomanski.timer.domain.model.BestAvg
 import com.mtomanski.timer.domain.model.Speedcuber.BestAvgChanged
 import com.mtomanski.timer.domain.repository.BestAvgRepository
+import org.slf4j.LoggerFactory
 
 class Projector @Inject()(repo: BestAvgRepository) extends PersistentActor {
+  private val logger = LoggerFactory.getLogger(getClass)
   private implicit val actorMaterializer = ActorMaterializer()(context)
 
   var offset = 0L
@@ -24,7 +26,7 @@ class Projector @Inject()(repo: BestAvgRepository) extends PersistentActor {
       firstOffsetSaved = true
     }
     case event: BestAvgChanged =>
-      println(s"Updating view of best averages with $event")
+      logger.info(s"Updating view of best averages with $event")
       repo.upsert(BestAvg(event.user, event.millis))
   }
 
@@ -33,10 +35,10 @@ class Projector @Inject()(repo: BestAvgRepository) extends PersistentActor {
       offset = value
       firstOffsetSaved = true
     case RecoveryCompleted =>
-      println(s"Offset recovery completed. Last offset: $offset")
+      logger.debug(s"Offset recovery completed. Last offset: $offset")
       val source = readJournal.eventsByTag("Speedcuber", offset).drop(if (firstOffsetSaved) 1 else 0)
       source.map{e => self ! e.event; e}.runWith(Sink.foreach{ e => self ! SaveOffset(e.offset)})
-      println("Event stream processing started")
+      logger.info("Event stream processing started")
   }
 
   override def persistenceId: String = "projector"
@@ -51,4 +53,3 @@ object Projector {
 
 case class SaveOffset(offset: Long)
 case class OffsetSaved(offset: Long)
-case object StreamCompleted

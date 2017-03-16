@@ -11,6 +11,7 @@ import slick.driver.PostgresDriver.api._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+// This should be changed to a proper slick table instead of plain sql
 class PostgresBestAvgRepository @Inject()(val dbConfigProvider: DatabaseConfigProvider) extends BestAvgRepository with HasDatabaseConfigProvider[JdbcProfile]{
 
   def getAll(): Future[Seq[BestAvg]] = {
