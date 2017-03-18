@@ -16,9 +16,6 @@ class PostgresBestAvgRepository @Inject()(val dbConfigProvider: DatabaseConfigPr
   def getAll(): Future[Seq[BestAvgRow]] =
     db.run(bestAvgs.sortBy(_.average.asc).take(10).result)
 
-  def upsert(bestAvg: BestAvg): Future[Int] =
-    db.run(bestAvgs.insertOrUpdate(BestAvgRow(bestAvg.user, bestAvg.millis)))
-
 }
 
 

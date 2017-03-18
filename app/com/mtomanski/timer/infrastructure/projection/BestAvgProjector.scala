@@ -11,17 +11,26 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import com.mtomanski.timer.domain.model.BestAvg
 import com.mtomanski.timer.domain.model.Speedcuber.BestAvgChanged
-import com.mtomanski.timer.domain.repository.BestAvgRepository
+import com.mtomanski.timer.infrastructure.projection.builder.BestAvgViewBuilder
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class BestAvgProjector @Inject()(repo: BestAvgRepository) extends PersistentActor {
+class BestAvgProjector @Inject()(viewBuilder: BestAvgViewBuilder) extends PersistentActor {
   private val logger = LoggerFactory.getLogger(getClass)
   private implicit val actorMaterializer = ActorMaterializer()(context)
 
   var state = State(offset = 0, firstOffsetSaved = false)
+
+  private def handleEvent: PartialFunction[EventEnvelope, Future[Long]] = {
+    case EventEnvelope(offset, _, _, event: BestAvgChanged) =>
+      logger.info(s"Updating view of best averages with $event")
+      viewBuilder.upsertBestAvgView(BestAvg(event.user, event.millis)).map(_ => offset)
+    case EventEnvelope(offset, _, _, event) =>
+      logger.debug(s"Ignoring $event during projection")
+      Future.successful(offset)
+  }
 
   override def receiveCommand: Receive = {
     case SaveOffset(value) => persist(OffsetSaved(value)) { offsetSaved =>
@@ -41,14 +50,7 @@ class BestAvgProjector @Inject()(repo: BestAvgRepository) extends PersistentActo
 
   private def startProcessing() = {
     val source = readJournal.eventsByTag("Speedcuber", state.offset).drop(dropIfNeeded)
-    source.mapAsync(1) {
-      case EventEnvelope(offset, _, _, event: BestAvgChanged) =>
-        logger.info(s"Updating view of best averages with $event")
-        repo.upsert(BestAvg(event.user, event.millis)).map(_ => offset)
-      case EventEnvelope(offset, _, _, event) =>
-        logger.debug(s"Ignoring $event during projection")
-        Future.successful(offset)
-    }.runWith(Sink.foreach(offset => self ! SaveOffset(offset)))
+    source.mapAsync(1)(handleEvent).runWith(Sink.foreach(offset => self ! SaveOffset(offset)))
     logger.info("Event stream processing started")
   }
 
@@ -63,7 +65,7 @@ class BestAvgProjector @Inject()(repo: BestAvgRepository) extends PersistentActo
 }
 
 object BestAvgProjector {
-  def props(repo: BestAvgRepository) = Props(new BestAvgProjector(repo))
+  def props(viewBuilder: BestAvgViewBuilder) = Props(new BestAvgProjector(viewBuilder))
 }
 
 case class State(offset: Long, firstOffsetSaved: Boolean)
