@@ -22,7 +22,7 @@ There is a new wave of speedcubers - people who solve the Rubik's Cube as fast a
 
 * PostgreSQL needs to be up and running. It should be available on port 5432. The username and the password can be configured in `application.conf`. Database name is `timer`. In order to create schema, execute `1.sql` located in `/evolutions/`.
 
-#### Launching application
+#### Launching the application
 
 Run `sbt run` to launch the application. Then use your favourite browser and go to `localhost:9000`. The timer is started and stopped with a spacebar.
 

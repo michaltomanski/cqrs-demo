@@ -21,7 +21,6 @@ class Module(environment: Environment, configuration: Configuration) extends Abs
       .asEagerSingleton()
     bind(classOf[SpeedcuberLocator]).to(classOf[SpeedcuberClusterShardLocator])
     bind(classOf[BestAvgRepository]).to(classOf[PostgresBestAvgRepository])
-
   }
 }
 
