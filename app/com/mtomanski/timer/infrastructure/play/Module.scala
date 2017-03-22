@@ -47,8 +47,11 @@ class ProjectorProvider @Inject()(actorSystem: ActorSystem,
       terminationMessage = PoisonPill,
       settings = ClusterSingletonManagerSettings(actorSystem)), "proj")
 
+  println(clustrerSingletonManager.path.toStringWithoutAddress)
+  println(actorSystem.name)
+
   val proxy = ClusterSingletonProxy.props(
-    "/user/consumer",
+    "/user/proj",
     ClusterSingletonProxySettings(actorSystem))
 
   private lazy val instance =
