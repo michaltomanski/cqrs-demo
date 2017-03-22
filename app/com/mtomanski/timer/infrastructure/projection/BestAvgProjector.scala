@@ -23,6 +23,12 @@ class BestAvgProjector @Inject()(viewBuilder: BestAvgViewBuilder) extends Persis
 
   var state = State(offset = 0, firstOffsetSaved = false)
 
+
+  override def preStart(): Unit = {
+    super.preStart()
+    logger.info("BestAvgProjector is being started")
+  }
+
   private def handleEvent: PartialFunction[EventEnvelope, Future[Long]] = {
     case EventEnvelope(offset, _, _, event: BestAvgChanged) =>
       logger.info(s"Updating view of best averages with $event")
