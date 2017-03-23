@@ -13,6 +13,11 @@
         <appender-ref ref="STDOUT" />
     </logger>
 
+
+    <logger name="akka" level="debug" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+
     <root level="error">
         <appender-ref ref="STDOUT" />
     </root>
