@@ -29,18 +29,19 @@ class Speedcuber extends PersistentActor {
   private var state = State()
 
   override def receiveCommand: Receive = {
-    case addTime: AddTime => persist(TimeAdded(addTime.user, addTime.millis)) { event =>
-      updateState(event)
-      logger.info(s"New time persisted $event")
-      val newAvg = AverageCalculator.calculateLastAvg5(state.times)
-      if (isNewAvgBetter(newAvg)) {
-        persist(BestAvgChanged(event.user, newAvg)) { event =>
-          updateState(event)
-          logger.info(s"New best average persisted $event")
+    case addTime: AddTime =>
+      persist(TimeAdded(addTime.user, addTime.millis)) { event =>
+        updateState(event)
+        logger.info(s"New time persisted $event")
+        val newAvg = AverageCalculator.calculateLastAvg5(state.times)
+        if (isNewAvgBetter(newAvg)) {
+          persist(BestAvgChanged(event.user, newAvg)) { event =>
+            updateState(event)
+            logger.info(s"New best average persisted $event")
+          }
         }
+        sender ! event
       }
-      sender ! event
-    }
   }
 
   override def receiveRecover: Receive = {
@@ -48,7 +49,7 @@ class Speedcuber extends PersistentActor {
       updateState(event)
       logger.debug(s"Received $event while recovering entity $persistenceId")
     case RecoveryCompleted =>
-      logger.debug("Domain events recovery completed")
+      logger.debug(s"Domain events recovery completed for ${self.path.name}")
       logger.debug(s"Recovered ${state.times.length} times")
   }
 
@@ -61,9 +62,8 @@ class Speedcuber extends PersistentActor {
       state = state.copy(bestAvg = newBestAvg)
   }
 
-  private def isNewAvgBetter(newAvg: Long) = state.times.length == 5 || newAvg < state.bestAvg
+  private def isNewAvgBetter(newAvg: Long) =
+    state.times.length == 5 || newAvg < state.bestAvg
 
   override def persistenceId: String = "speedcuber-" + self.path.name
 }
-
-

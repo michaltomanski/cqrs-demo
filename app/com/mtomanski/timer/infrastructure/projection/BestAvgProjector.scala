@@ -62,6 +62,10 @@ class BestAvgProjector @Inject()(viewBuilder: BestAvgViewBuilder) extends Persis
     state = state.copy(offset = offset, firstOffsetSaved = true)
   }
 
+  override def preStart(): Unit = {
+    super.preStart()
+    logger.info("Starting BestAvgProjector")
+  }
 }
 
 object BestAvgProjector {
