@@ -33,7 +33,7 @@
                     isStarted = false;
                     clearInterval(timerFunction);
                     var username = $('#username').val();
-                    $.postJSON("http://localhost:9000/time", {user: username, millis: milliseconds});
+                    $.postJSON("/time", {user: username, millis: milliseconds});
                 } else {
                     isStarted = true;
                     milliseconds = 0;
