@@ -47,7 +47,7 @@ class Speedcuber extends PersistentActor {
   override def receiveRecover: Receive = {
     case event: Event =>
       updateState(event)
-      logger.debug(s"Received $event while recovering entity $persistenceId")
+      logger.debug(s"Received $event while recovering $persistenceId")
     case RecoveryCompleted =>
       logger.debug(s"Domain events recovery completed for ${self.path.name}")
       logger.debug(s"Recovered ${state.times.length} times")
